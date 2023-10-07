@@ -2,6 +2,7 @@ import { combineReducers, Store, CombinedState, AnyAction } from 'redux';
 import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
 import { MakeStore, createWrapper, HYDRATE } from 'next-redux-wrapper';
 import counterReducer from './redux/reduxSlice';
+import authReducer from './auth/authSlice';
 
 const rootReducer = (state: any, action: AnyAction): CombinedState<any> => {
   switch (action.type) {
@@ -10,6 +11,7 @@ const rootReducer = (state: any, action: AnyAction): CombinedState<any> => {
     default: {
       const combinedReducer = combineReducers({
         counterReducer,
+        authReducer,
       });
       return combinedReducer(state, action);
     }
