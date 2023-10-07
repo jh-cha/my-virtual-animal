@@ -22,6 +22,7 @@ import Container from '@mui/material/Container';
 
 import { store } from '../store/index';
 import { Provider } from 'react-redux';
+import NavBar from '@/components/NavBar/NavBar';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -38,30 +39,6 @@ function Copyright(props: any) {
   );
 }
 
-const tiers = [
-  {
-    title: 'Free',
-    price: '0',
-    description: ['10 users included', '2 GB of storage', 'Help center access', 'Email support'],
-    buttonText: 'Sign up for free',
-    buttonVariant: 'outlined',
-  },
-  {
-    title: 'Pro',
-    subheader: 'Most popular',
-    price: '15',
-    description: ['20 users included', '10 GB of storage', 'Help center access', 'Priority email support'],
-    buttonText: 'Get started',
-    buttonVariant: 'contained',
-  },
-  {
-    title: 'Enterprise',
-    price: '30',
-    description: ['50 users included', '30 GB of storage', 'Help center access', 'Phone & email support'],
-    buttonText: 'Contact us',
-    buttonVariant: 'outlined',
-  },
-];
 const footers = [
   {
     title: 'Company',
@@ -92,26 +69,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Provider store={store}>
             <GlobalStyles styles={{ ul: { margin: 0, padding: 0, listStyle: 'none' } }} />
             <CssBaseline />
-            <AppBar
-              position="static"
-              color="default"
-              elevation={0}
-              sx={{ borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}
-            >
-              <Toolbar sx={{ flexWrap: 'wrap' }}>
-                <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
-                  Personal Boilerplate
-                </Typography>
-                <nav>
-                  <Link variant="button" color="text.primary" href="/redux" sx={{ my: 1, mx: 1.5 }}>
-                    redux test
-                  </Link>
-                </nav>
-                <Button href="#" variant="outlined" sx={{ my: 1, mx: 1.5 }}>
-                  Login
-                </Button>
-              </Toolbar>
-            </AppBar>
+
+            <NavBar />
 
             {children}
 

@@ -1,20 +1,38 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-type CounterState = {
-  value: number;
+type AuthState = {
+  account: string;
+  shortAddress: string;
+  isAuthenticated: boolean;
+  isAuthenticating: boolean;
 };
 
 const initialState = {
-  value: 0,
-} as CounterState;
+  account: '',
+  shortAddress: '',
+  isAuthenticated: false,
+  isAuthenticating: false,
+} as AuthState;
 
-export const counter = createSlice({
+export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    reset: () => initialState,
+    init: () => initialState,
+    loginSuccess: (state, action) => {
+      state.account = action.payload;
+      state.shortAddress = action.payload.slice(0, 4) + '...' + action.payload.slice(-2);
+      state.isAuthenticated = true;
+      state.isAuthenticating = false;
+    },
+    logout: (state) => {
+      state.account = '';
+      state.shortAddress = '';
+      state.isAuthenticated = false;
+      state.isAuthenticating = false;
+    },
   },
 });
 
-export const { reset } = counter.actions;
-export default counter.reducer;
+export const { init, loginSuccess, logout } = authSlice.actions;
+export default authSlice.reducer;
