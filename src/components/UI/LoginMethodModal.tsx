@@ -1,6 +1,5 @@
 import React from 'react';
 import wc from '../../assets/images/wc.svg';
-import metamask from '@/asset/images/metamask.png';
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import Box from '@mui/material/Box';
@@ -11,7 +10,7 @@ import Image from 'next/image';
 import { RootState } from '@/store';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { loginSuccess, logout } from '@/store/auth/authSlice';
-import { Container } from '@mui/material';
+import { Avatar, Chip, Container } from '@mui/material';
 
 declare global {
   interface Window {
@@ -33,6 +32,7 @@ const LoginMethodModal = ({ loginModalOpen, setLoginModalOpen }: LoginMethodModa
 
   const account = useAppSelector((state) => state.authReducer.account);
   const isAuthenticated = useAppSelector((state) => state.authReducer.isAuthenticated);
+  const prevIsAuthenticatedRef = React.useRef(isAuthenticated);
 
   const loginMetamask = async () => {
     console.log('loginMetamask');
@@ -42,20 +42,10 @@ const LoginMethodModal = ({ loginModalOpen, setLoginModalOpen }: LoginMethodModa
         // MetaMask에서 지원하는 account 연결 메소드
         method: 'eth_requestAccounts',
       });
-      dispatch(loginSuccess(accounts));
+      dispatch(loginSuccess(accounts[0]));
     } catch (error) {
       console.error('loginMetamask Error', error);
     }
-  };
-
-  const logoutMetamask = async () => {
-    await window.ethereum.request({
-      // MetaMask에서 지원하는 연결 해제 메소드
-      method: 'wallet_requestPermissions',
-      params: [{ eth_accounts: {} }],
-    });
-
-    dispatch(logout());
   };
 
   const handleCopy = () => {
@@ -68,6 +58,40 @@ const LoginMethodModal = ({ loginModalOpen, setLoginModalOpen }: LoginMethodModa
 
   const handleClose = () => setLoginModalOpen(false);
 
+  React.useEffect(() => {
+    if (!prevIsAuthenticatedRef.current && isAuthenticated) {
+      handleClose();
+      prevIsAuthenticatedRef.current = isAuthenticated;
+    }
+  }, [isAuthenticated]);
+
+  const chipList = (obj: provider) => {
+    return (
+      <>
+        <Chip avatar={<Avatar alt={obj.alt} src={obj.src} />} label={obj.label} variant="outlined" />
+      </>
+    );
+  };
+
+  type provider = {
+    alt: string;
+    src: string;
+    label: string;
+  };
+
+  const providerList: provider[] = [
+    {
+      alt: '1',
+      src: '/images/metamask.png',
+      label: 'metamask',
+    },
+    {
+      alt: '2',
+      src: '/images/eth.png',
+      label: 'eth',
+    },
+  ];
+
   return (
     <>
       <Modal
@@ -78,13 +102,9 @@ const LoginMethodModal = ({ loginModalOpen, setLoginModalOpen }: LoginMethodModa
       >
         <Box sx={style}>
           <Container onClick={loginMetamask}>
-            <Typography id="modal-modal-title" variant="h6" component="h2">
-              Metamask
-            </Typography>
-            <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-              메타마스크 로그인
-            </Typography>
-            <Image src={metamask} alt="metamask" className="h-8 w-8" />
+            {providerList.map((provider) => {
+              return chipList(provider);
+            })}
           </Container>
         </Box>
       </Modal>
