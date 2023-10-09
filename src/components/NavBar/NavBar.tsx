@@ -91,6 +91,13 @@ const NavBar = (): JSX.Element => {
             </Link>
           </nav>
 
+          {/* myPage */}
+          {isAuthenticated && (
+            <Link variant="button" color="text.primary" href="/mypage" sx={{ my: 1, mx: 1.5 }}>
+              MYPAGE
+            </Link>
+          )}
+
           {/* login */}
           {!isAuthenticated && (
             <Button onClick={() => setLoginModalOpen(true)} variant="outlined" sx={{ my: 1, mx: 1.5 }}>
