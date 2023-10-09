@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 type MintFormState = {
+  file: any;
   mint: {
-    image: string;
     name: string;
     supply: number;
     description: string;
@@ -12,10 +12,10 @@ type MintFormState = {
 };
 
 const initialState: MintFormState = {
+  file: {},
   mint: {
-    image: '',
     name: '',
-    supply: 0,
+    supply: 1,
     description: '',
     network: '',
   },
@@ -33,8 +33,11 @@ export const mintSlice = createSlice({
         state.mint[action.payload.prop] = action.payload.value as number;
       }
     },
+    uploadFile: (state, action) => {
+      state.file = action.payload;
+    },
   },
 });
 
-export const { init, changeValue } = mintSlice.actions;
+export const { init, changeValue, uploadFile } = mintSlice.actions;
 export default mintSlice.reducer;

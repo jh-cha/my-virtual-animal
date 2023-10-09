@@ -11,11 +11,12 @@ import {
   Typography,
   styled,
 } from '@mui/material';
-import { changeValue } from '@/store/mint/mintSlice';
+import { changeValue, uploadFile } from '@/store/mint/mintSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import axios from 'axios';
 import FormData from 'form-data';
 import { useState } from 'react';
+import MintMethodModal from '@/components/UI/MintMethodModal';
 
 const network = [
   {
@@ -37,44 +38,19 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 export default function Mint() {
-  const [file, setFile] = useState<any>();
-  const [selectImage, setselectImage] = useState<any>();
+  const [mintModalOpen, setMintModalOpen] = useState(false);
+  const [selectImage, setSelectImage] = useState<any>();
   const dispatch = useAppDispatch();
   const mint = useAppSelector((state) => state.mintReducer.mint);
-
-  const JWT = process.env.NEXT_PUBLIC_PINATA_JWT_SECRET_ACCESS_TOKEN_KEY!;
-  const pinFileToIPFS = async () => {
-    const formData = new FormData();
-    const src = 'path/to/file.png';
-
-    formData.append('file', file);
-
-    const pinataMetadata = JSON.stringify({
-      name: mint.name,
-    });
-    formData.append('pinataMetadata', pinataMetadata);
-
-    try {
-      const res = await axios.post('https://api.pinata.cloud/pinning/pinFileToIPFS', formData, {
-        maxBodyLength: Infinity,
-        headers: {
-          'Content-Type': `multipart/form-data;`,
-          Authorization: `Bearer ${JWT}`,
-        },
-      });
-      console.log(res.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const file = useAppSelector((state) => state.mintReducer.file);
 
   const uploadImage = (image: any) => {
-    setFile(image);
+    dispatch(uploadFile(image));
 
     if (image) {
       const reader = new FileReader();
       reader.onload = (loadEvent) => {
-        if (loadEvent && loadEvent.target) setselectImage(loadEvent.target.result);
+        if (loadEvent && loadEvent.target) setSelectImage(loadEvent.target.result);
       };
       reader.readAsDataURL(image);
     }
@@ -87,27 +63,49 @@ export default function Mint() {
   };
 
   return (
-    <Container className={style.createContainer}>
-      <Container className={style.titleContaicer}>
-        <Typography variant="h3" component="h3">
-          Create an NFT
-        </Typography>
-        <Typography>Once your item is minted you will not be able to change any of its information.</Typography>
-      </Container>
+    <>
+      {mintModalOpen && <MintMethodModal mintModalOpen={mintModalOpen} setMintModalOpen={setMintModalOpen} />}
 
-      <Container className={style.nftContainer}>
-        {file ? (
-          <Container className={style.cardContainer}>
-            <Card>
-              <Container className={style.ChangeImageButton}>
-                <CardActionArea>
-                  <CardMedia component="img" image={selectImage} alt={file.name} />
-                </CardActionArea>
-              </Container>
-              <Container className={style.ChangeImageButton}>
+      <Container className={style.createContainer}>
+        <Container className={style.titleContaicer}>
+          <Typography variant="h3" component="h3">
+            Create an NFT
+          </Typography>
+          <Typography>Once your item is minted you will not be able to change any of its information.</Typography>
+        </Container>
+
+        <Container className={style.nftContainer}>
+          {file.name ? (
+            <Container className={style.cardContainer}>
+              <Card>
+                <Container className={style.ChangeImageButton}>
+                  <CardActionArea>
+                    <CardMedia component="img" image={selectImage} alt={file.name} />
+                  </CardActionArea>
+                </Container>
+                <Container className={style.ChangeImageButton}>
+                  <Container className={style.imageUploadButton}>
+                    <Button component="label" variant="outlined">
+                      Change file
+                      <VisuallyHiddenInput
+                        type="file"
+                        onChange={(event) => {
+                          if (event.target && event.target.files && event.target.files[0])
+                            uploadImage(event.target.files[0]);
+                        }}
+                      />
+                    </Button>
+                  </Container>
+                </Container>
+              </Card>
+            </Container>
+          ) : (
+            <Container className={style.imageUploadContainer}>
+              <Container className={style.imageUploadWrapper}>
+                <Typography className={style.imageUploadText}>Upload media</Typography>
                 <Container className={style.imageUploadButton}>
                   <Button component="label" variant="outlined">
-                    Change file
+                    Upload file
                     <VisuallyHiddenInput
                       type="file"
                       onChange={(event) => {
@@ -117,112 +115,93 @@ export default function Mint() {
                     />
                   </Button>
                 </Container>
+                <Typography className={style.imageUploadText}>Max Size: 50MB</Typography>
+                <Typography className={style.imageUploadText}>JPG, PNG, GIF, SVG, MP4</Typography>
               </Container>
-            </Card>
-          </Container>
-        ) : (
-          <Container className={style.imageUploadContainer}>
-            <Container className={style.imageUploadWrapper}>
-              <Typography className={style.imageUploadText}>Upload media</Typography>
-              <Container className={style.imageUploadButton}>
-                <Button component="label" variant="outlined">
-                  Upload file
-                  <VisuallyHiddenInput
-                    type="file"
-                    onChange={(event) => {
-                      if (event.target && event.target.files && event.target.files[0])
-                        uploadImage(event.target.files[0]);
-                    }}
-                  />
+            </Container>
+          )}
+
+          <Container className={style.inputFormContainer}>
+            <Container>
+              <Container className={style.inputNameContainer}>
+                <Typography>Name*</Typography>
+                <TextField
+                  id="outlined-basic"
+                  className={style.inputName}
+                  placeholder="Name your NFT"
+                  variant="outlined"
+                  onChange={(event) => {
+                    dispatch(changeValue({ prop: 'name', value: event.target.value }));
+                  }}
+                />
+              </Container>
+
+              <Container className={style.inputSupplyContainer}>
+                <Typography>Supply*</Typography>
+                <TextField
+                  id="outlined-basic"
+                  className={style.inputSupply}
+                  variant="outlined"
+                  value={mint.supply}
+                  onChange={(event) => {
+                    dispatch(changeValue({ prop: 'supply', value: Number(event.target.value) }));
+                  }}
+                />
+              </Container>
+
+              <Container className={style.inputDescriptionContainer}>
+                <Typography>Description</Typography>
+                <TextField
+                  id="outlined-multiline-static"
+                  className={style.inputDescription}
+                  placeholder="Enter a description"
+                  variant="outlined"
+                  multiline
+                  rows={4}
+                  onChange={(event) => {
+                    dispatch(changeValue({ prop: 'description', value: event.target.value }));
+                  }}
+                />
+              </Container>
+
+              <Container className={style.selectNetworkContainer}>
+                <Typography>Network*</Typography>
+                <Typography>Please select a network to deploy.</Typography>
+                <TextField
+                  id="outlined-basic"
+                  select
+                  className={style.selectNetwork}
+                  value={mint.network}
+                  onChange={(event) => {
+                    dispatch(changeValue({ prop: 'network', value: event.target.value }));
+                  }}
+                >
+                  {network.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Container>
+
+              <Container className={style.bottomContainer}>
+                <Typography variant="overline" className={style.textInfo}>
+                  * 항목은 필수입니다.
+                </Typography>
+                <Button
+                  className={style.buttonCreate}
+                  variant="outlined"
+                  onClick={() => setMintModalOpen(true)}
+                  disabled={handelCreateButton()}
+                >
+                  CREATE
                 </Button>
               </Container>
-              <Typography className={style.imageUploadText}>Max Size: 50MB</Typography>
-              <Typography className={style.imageUploadText}>JPG, PNG, GIF, SVG, MP4</Typography>
-            </Container>
-          </Container>
-        )}
-
-        <Container className={style.inputFormContainer}>
-          <Container>
-            <Container className={style.inputNameContainer}>
-              <Typography>Name*</Typography>
-              <TextField
-                id="outlined-basic"
-                className={style.inputName}
-                label="name"
-                variant="outlined"
-                onChange={(event) => {
-                  dispatch(changeValue({ prop: 'name', value: event.target.value }));
-                }}
-              />
-            </Container>
-
-            <Container className={style.inputSupplyContainer}>
-              <Typography>Supply*</Typography>
-              <TextField
-                id="outlined-basic"
-                className={style.inputSupply}
-                label="Supply"
-                variant="outlined"
-                onChange={(event) => {
-                  dispatch(changeValue({ prop: 'supply', value: Number(event.target.value) }));
-                }}
-              />
-            </Container>
-
-            <Container className={style.inputDescriptionContainer}>
-              <Typography>Description</Typography>
-              <TextField
-                id="outlined-multiline-static"
-                className={style.inputDescription}
-                label="Enter a description"
-                variant="outlined"
-                multiline
-                rows={4}
-                onChange={(event) => {
-                  dispatch(changeValue({ prop: 'description', value: event.target.value }));
-                }}
-              />
-            </Container>
-
-            <Container className={style.selectNetworkContainer}>
-              <Typography>Network*</Typography>
-              <Typography>배포될 네트워크를 선택해주세요.</Typography>
-              <TextField
-                id="outlined-basic"
-                select
-                className={style.selectNetwork}
-                value={mint.network}
-                label="Select"
-                onChange={(event) => {
-                  dispatch(changeValue({ prop: 'network', value: event.target.value }));
-                }}
-              >
-                {network.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Container>
-
-            <Container className={style.bottomContainer}>
-              <Typography variant="overline" className={style.textInfo}>
-                * 항목은 필수입니다.
-              </Typography>
-              <Button
-                className={style.buttonCreate}
-                variant="outlined"
-                onClick={() => pinFileToIPFS()}
-                disabled={handelCreateButton()}
-              >
-                CREATE
-              </Button>
             </Container>
           </Container>
         </Container>
       </Container>
-    </Container>
+    </>
   );
 }
 
