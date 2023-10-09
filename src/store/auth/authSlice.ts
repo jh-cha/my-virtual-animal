@@ -8,8 +8,8 @@ type Account = {
 
 type AuthState = {
   account: Account;
-  provider: any;
-  signer: any;
+  provider: Object;
+  signer: Object;
   isAuthenticated: boolean;
   isAuthenticating: boolean;
   [key: string]: any;
