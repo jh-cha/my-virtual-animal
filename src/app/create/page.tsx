@@ -1,8 +1,12 @@
 'use client';
 
 import { Box, Container, TextField, Typography } from '@mui/material';
+import { changeValue } from '@/store/mint/mintSlice';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 
 export default function Create() {
+  const dispatch = useAppDispatch();
+  const mint = useAppSelector((state) => state.mintReducer.mint);
   return (
     <Container className={style.createContainer}>
       <Container className={style.titleContaicer}>
@@ -24,11 +28,25 @@ export default function Create() {
           <Container>
             <Container className={style.inputNameContainer}>
               <Typography>Name*</Typography>
-              <TextField id="outlined-basic" label="name" variant="outlined" />
+              <TextField
+                id="outlined-basic"
+                label="name"
+                variant="outlined"
+                onChange={(event) => {
+                  dispatch(changeValue({ prop: 'name', value: event.target.value }));
+                }}
+              />
             </Container>
             <Container className={style.inputSupplyContainer}>
               <Typography>Supply*</Typography>
-              <TextField id="outlined-basic" label="Supply" variant="outlined" />
+              <TextField
+                id="outlined-basic"
+                label="Supply"
+                variant="outlined"
+                onChange={(event) => {
+                  dispatch(changeValue({ prop: 'supply', value: event.target.value }));
+                }}
+              />
             </Container>
             <Container className={style.inputDescriptionContainer}>
               <Typography>Description</Typography>

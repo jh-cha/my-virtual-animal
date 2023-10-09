@@ -1,8 +1,8 @@
 import { combineReducers, Store, CombinedState, AnyAction } from 'redux';
 import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
 import { MakeStore, createWrapper, HYDRATE } from 'next-redux-wrapper';
-import counterReducer from './redux/reduxSlice';
 import authReducer from './auth/authSlice';
+import mintReducer from './mint/mintSlice';
 
 const rootReducer = (state: any, action: AnyAction): CombinedState<any> => {
   switch (action.type) {
@@ -10,8 +10,8 @@ const rootReducer = (state: any, action: AnyAction): CombinedState<any> => {
       return { ...state, ...action.payload };
     default: {
       const combinedReducer = combineReducers({
-        counterReducer,
         authReducer,
+        mintReducer,
       });
       return combinedReducer(state, action);
     }

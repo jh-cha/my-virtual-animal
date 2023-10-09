@@ -1,18 +1,26 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-type AuthState = {
-  account: string;
+type Account = {
+  address: string;
   shortAddress: string;
+  balance: number;
+};
+
+type AuthState = {
+  account: Account;
   isAuthenticated: boolean;
   isAuthenticating: boolean;
 };
 
-const initialState = {
-  account: '',
-  shortAddress: '',
+const initialState: AuthState = {
+  account: {
+    address: '',
+    shortAddress: '',
+    balance: 0,
+  },
   isAuthenticated: false,
   isAuthenticating: false,
-} as AuthState;
+};
 
 export const authSlice = createSlice({
   name: 'auth',
@@ -20,19 +28,22 @@ export const authSlice = createSlice({
   reducers: {
     init: () => initialState,
     loginSuccess: (state, action) => {
-      state.account = action.payload;
-      state.shortAddress = action.payload.slice(0, 4) + '...' + action.payload.slice(-2);
+      state.account.address = action.payload;
+      state.account.shortAddress = action.payload.slice(0, 4) + '...' + action.payload.slice(-2);
       state.isAuthenticated = true;
       state.isAuthenticating = false;
     },
     logout: (state) => {
-      state.account = '';
-      state.shortAddress = '';
+      state.account.address = '';
+      state.account.shortAddress = '';
       state.isAuthenticated = false;
       state.isAuthenticating = false;
+    },
+    setBalance: (state, action) => {
+      state.account.balance = action.payload;
     },
   },
 });
 
-export const { init, loginSuccess, logout } = authSlice.actions;
+export const { init, loginSuccess, logout, setBalance } = authSlice.actions;
 export default authSlice.reducer;
