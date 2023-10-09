@@ -26,7 +26,7 @@ type MintMethodModalProps = {
 const MintMethodModal = ({ mintModalOpen, setMintModalOpen }: MintMethodModalProps): JSX.Element => {
   const [activeStep, setActiveStep] = React.useState(0);
   const [stepError, setStepError] = React.useState(false);
-  const [fileCID, setFileCID] = React.useState(0);
+  const [fileCID, setFileCID] = React.useState('');
 
   const JWT = process.env.NEXT_PUBLIC_PINATA_JWT_SECRET_ACCESS_TOKEN_KEY!;
   const contractAddress = process.env.NEXT_PUBLIC_MY_VIRTUAL_ANIMAL_CONTRACT!;
@@ -76,7 +76,7 @@ const MintMethodModal = ({ mintModalOpen, setMintModalOpen }: MintMethodModalPro
           Authorization: `Bearer ${JWT}`,
         },
       });
-      setFileCID(res.data.file);
+      setFileCID(res.data.IpfsHash);
       return true;
     } catch (error) {
       return false;
@@ -91,29 +91,44 @@ const MintMethodModal = ({ mintModalOpen, setMintModalOpen }: MintMethodModalPro
     return false;
   };
 
-  const initialze = async () => {
+  const firstStep = async () => {
     const validation = await mintValidation();
     if (validation) {
       // 1.uploading file
       const ipfs_res = await pinFileToIPFS();
       if (!ipfs_res) return handleStepClose(false);
       setActiveStep(1);
-
-      // 2.minting NFT
-      const nft_res = await mintNFT();
-      if (!nft_res) return handleStepClose(false);
-      setActiveStep(2);
-
-      // 3.Complete
-      handleStepClose(true);
-      setActiveStep(3);
     }
+  };
+  const secondStep = async () => {
+    // 2.minting NFT
+    const nft_res = await mintNFT();
+    if (!nft_res) return handleStepClose(false);
+    setActiveStep(2);
+  };
+  const thirdStep = () => {
+    // 3.Complete
+    setActiveStep(3);
+    handleStepClose(true);
   };
 
   React.useEffect(() => {
-    setActiveStep(0);
-    initialze();
-  }, []);
+    if (activeStep === 0) {
+      firstStep();
+    }
+  }, [activeStep]);
+
+  React.useEffect(() => {
+    if (activeStep === 1) {
+      secondStep();
+    }
+  }, [fileCID]);
+
+  React.useEffect(() => {
+    if (activeStep === 2) {
+      thirdStep();
+    }
+  }, [activeStep]);
 
   const steps = ['Uploading Image to IPFS', 'Minting NFT on Blockchain', 'Complete'];
 
