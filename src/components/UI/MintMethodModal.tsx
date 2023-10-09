@@ -86,7 +86,7 @@ const MintMethodModal = ({ mintModalOpen, setMintModalOpen }: MintMethodModalPro
   const mintValidation = () => {
     // Goerli 테스트 네트워크만 지원
     const currentChainId = window.ethereum.chainId;
-    if (currentChainId !== 0x5) return false;
+    if (currentChainId !== '0x5') return false;
     if (file && name && supply && network) return true;
     return false;
   };
