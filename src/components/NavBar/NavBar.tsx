@@ -74,7 +74,7 @@ const NavBar = (): JSX.Element => {
           </nav>
 
           <nav>
-            <Link variant="button" color="text.primary" href="/create" sx={{ my: 1, mx: 1.5 }}>
+            <Link variant="button" color="text.primary" href="/mint" sx={{ my: 1, mx: 1.5 }}>
               CREATE
             </Link>
           </nav>
