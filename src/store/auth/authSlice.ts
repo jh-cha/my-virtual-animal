@@ -8,8 +8,11 @@ type Account = {
 
 type AuthState = {
   account: Account;
+  provider: any;
+  signer: any;
   isAuthenticated: boolean;
   isAuthenticating: boolean;
+  [key: string]: any;
 };
 
 const initialState: AuthState = {
@@ -18,6 +21,8 @@ const initialState: AuthState = {
     shortAddress: '',
     balance: 0,
   },
+  provider: {},
+  signer: {},
   isAuthenticated: false,
   isAuthenticating: false,
 };
@@ -42,8 +47,11 @@ export const authSlice = createSlice({
     setBalance: (state, action) => {
       state.account.balance = action.payload;
     },
+    changeValue: (state, action) => {
+      state[action.payload.prop] = action.payload.value;
+    },
   },
 });
 
-export const { init, loginSuccess, logout, setBalance } = authSlice.actions;
+export const { init, loginSuccess, logout, setBalance, changeValue } = authSlice.actions;
 export default authSlice.reducer;
