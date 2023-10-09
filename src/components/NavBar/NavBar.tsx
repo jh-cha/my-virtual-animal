@@ -8,7 +8,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { logout, setBalance } from '@/store/auth/authSlice';
+import { logout, setBalance, changeValue } from '@/store/auth/authSlice';
 import { Avatar, Chip } from '@mui/material';
 
 const NavBar = (): JSX.Element => {
@@ -19,6 +19,17 @@ const NavBar = (): JSX.Element => {
   const isAuthenticated = useAppSelector((state) => state.authReducer.isAuthenticated);
   const address = useAppSelector((state) => state.authReducer.account.address);
   const balance = useAppSelector((state) => state.authReducer.account.balance);
+
+  const setProvider = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    dispatch(changeValue({ prop: 'provider', value: provider }));
+    const signer = provider.getSigner();
+    dispatch(changeValue({ prop: 'signer', value: signer }));
+
+    // signer.getAddress().then((address) => {
+    //   setSignerAddress(address);
+    // });
+  };
 
   const getBalance = async () => {
     if (typeof window.ethereum === 'undefined') {
@@ -48,6 +59,7 @@ const NavBar = (): JSX.Element => {
   React.useEffect(() => {
     if (isAuthenticated) {
       getBalance();
+      setProvider();
     }
   }, [isAuthenticated]);
 

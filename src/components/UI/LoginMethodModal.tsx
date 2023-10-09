@@ -9,7 +9,7 @@ import Modal from '@mui/material/Modal';
 import Image from 'next/image';
 import { RootState } from '@/store';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { loginSuccess, logout } from '@/store/auth/authSlice';
+import { loginSuccess } from '@/store/auth/authSlice';
 import { Avatar, Chip, Container } from '@mui/material';
 
 declare global {
@@ -94,12 +94,7 @@ const LoginMethodModal = ({ loginModalOpen, setLoginModalOpen }: LoginMethodModa
 
   return (
     <>
-      <Modal
-        open={loginModalOpen}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
+      <Modal open={loginModalOpen} onClose={handleClose} aria-labelledby="login-modal">
         <Box sx={style}>
           <Container onClick={loginMetamask}>
             {providerList.map((provider) => {
