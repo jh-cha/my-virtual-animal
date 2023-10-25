@@ -18,7 +18,7 @@ import React, { useEffect } from 'react';
 
 export default function Mypage() {
   const [tokenIdList, setTokenIdList] = React.useState([]);
-  const [tokenUriList, setTokenUriList] = React.useState([]);
+  const [tokenUriList, setTokenUriList] = React.useState<string[]>([]);
 
   const contractAddress = process.env.NEXT_PUBLIC_MY_VIRTUAL_ANIMAL_CONTRACT!;
 
@@ -27,7 +27,6 @@ export default function Mypage() {
   const isAuthenticated = useAppSelector((state) => state.authReducer.isAuthenticated);
   const account = useAppSelector((state) => state.authReducer.account);
   const signer = useAppSelector((state) => state.authReducer.signer);
-  console.log(tokenUriList);
 
   const getTokenIdList = async () => {
     try {
@@ -48,12 +47,12 @@ export default function Mypage() {
 
   const getTokenURI = async () => {
     try {
-      const uriList: any = [];
       const contract = new ethers.Contract(contractAddress, MvaV1MarketABI, signer);
-      tokenIdList.map(async (item: any) => {
-        const res = await contract.tokenURI(item);
-        uriList.push(res);
+      const uriPromises = tokenIdList.map(async (item: any) => {
+        return await contract.tokenURI(item);
       });
+
+      const uriList = await Promise.all(uriPromises);
       setTokenUriList(uriList);
       return true;
     } catch (error) {
@@ -62,12 +61,36 @@ export default function Mypage() {
   };
 
   React.useEffect(() => {
-    if (isAuthenticated) getTokenIdList();
-  }, [isAuthenticated]);
+    if (isAuthenticated) {
+      getTokenIdList();
+    }
+  }, []);
+  React.useEffect(() => {
+    if (isAuthenticated && signer) {
+      getTokenIdList();
+    }
+  }, [isAuthenticated, signer]);
 
   React.useEffect(() => {
     if (isAuthenticated) getTokenURI();
   }, [tokenIdList]);
+
+  const SwiperSlideComponents = (item: string) => {
+    if (item) {
+      return (
+        <SwiperSlide>
+          <Image
+            className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
+            src={'https://sapphire-top-canidae-293.mypinata.cloud/ipfs/' + item}
+            alt="Next.js Logo"
+            width={180}
+            height={37}
+            priority
+          />
+        </SwiperSlide>
+      );
+    }
+  };
 
   return (
     <Container className={style.MypageContainer}>
@@ -86,49 +109,10 @@ export default function Mypage() {
       </Container>
       <Container>
         <Box marginTop={4}>
-          <Swiper
-            modules={[Navigation, Pagination, Scrollbar, A11y]}
-            spaceBetween={40}
-            slidesPerView={4}
-            navigation
-            onSwiper={(swiper) => console.log(swiper)}
-            onSlideChange={() => console.log('slide change')}
-          >
-            <SwiperSlide>Slide 1</SwiperSlide>
-            <SwiperSlide>Slide 2</SwiperSlide>
-            <SwiperSlide>Slide 3</SwiperSlide>
-            <SwiperSlide>Slide 4</SwiperSlide>
-            <SwiperSlide>Slide 11</SwiperSlide>
-            <SwiperSlide>
-              <Image
-                className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-                src={'https://sapphire-top-canidae-293.mypinata.cloud/ipfs/' + tokenUriList[tokenUriList.length - 2]}
-                alt="Next.js Logo"
-                width={180}
-                height={37}
-                priority
-              />
-            </SwiperSlide>
-            <SwiperSlide>
-              <Image
-                className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-                src={'https://sapphire-top-canidae-293.mypinata.cloud/ipfs/' + tokenUriList[tokenUriList.length - 1]}
-                alt="Next.js Logo"
-                width={180}
-                height={37}
-                priority
-              />
-            </SwiperSlide>
-            <SwiperSlide>
-              <Image
-                className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-                src="https://sapphire-top-canidae-293.mypinata.cloud/ipfs/QmfSB2z22PMyuQrDFfbXghtyoqvUWSWZjBRHgyYeYmmic2"
-                alt="Next.js Logo"
-                width={180}
-                height={37}
-                priority
-              />
-            </SwiperSlide>
+          <Swiper modules={[Navigation, Pagination, Scrollbar, A11y]} spaceBetween={40} slidesPerView={4} navigation>
+            {tokenUriList.map((item) => {
+              return SwiperSlideComponents(item);
+            })}
           </Swiper>
         </Box>
       </Container>

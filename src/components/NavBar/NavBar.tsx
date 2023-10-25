@@ -6,7 +6,7 @@ import AppBar from '@mui/material/AppBar';
 import Button from '@mui/material/Button';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import Link from '@mui/material/Link';
+import Link from 'next/link';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { logout, setBalance, changeValue } from '@/store/auth/authSlice';
 import { Avatar, Chip } from '@mui/material';
@@ -79,23 +79,16 @@ const NavBar = (): JSX.Element => {
               My Virtual Animal
             </Typography>
           </Button>
-          <nav>
-            <Link variant="button" color="text.primary" href="/redux" sx={{ my: 1, mx: 1.5 }}>
-              redux test
-            </Link>
-          </nav>
 
-          <nav>
-            <Link variant="button" color="text.primary" href="/mint" sx={{ my: 1, mx: 1.5 }}>
-              CREATE
-            </Link>
-          </nav>
+          <Button sx={{ my: 1, mx: 1.5 }}>
+            <Link href="/mint">CREATE</Link>
+          </Button>
 
           {/* myPage */}
           {isAuthenticated && (
-            <Link variant="button" color="text.primary" href="/mypage" sx={{ my: 1, mx: 1.5 }}>
-              MYPAGE
-            </Link>
+            <Button sx={{ my: 1, mx: 1.5 }}>
+              <Link href="/mypage">MYPAGE</Link>
+            </Button>
           )}
 
           {/* login */}
